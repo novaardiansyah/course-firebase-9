@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getFirestore, collection, getDocs, addDoc
+  getFirestore, collection, getDocs, addDoc, deleteDoc, doc
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -46,6 +46,22 @@ addBook.addEventListener('submit', (e) => {
     .then(() => {
       console.log('Successfully store a new data.');
       addBook.reset();
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
+});
+
+const deleteBook = document.querySelector('#delete-book');
+deleteBook.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const book = doc(db, 'books', deleteBook.id.value);
+
+  deleteDoc(book)
+    .then(() => {
+      console.log('Successfully deleted data.');
+      deleteBook.reset();
     })
     .catch((error) => {
       console.log(error.message);
