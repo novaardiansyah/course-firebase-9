@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/novaardiansyah/course-firebase-9#readme",
   "dependencies": {
+    "firebase": "^9.10.0",
     "webpack": "^5.60.0"
   },
   "devDependencies": {

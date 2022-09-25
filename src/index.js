@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getFirestore, collection, getDocs
+  getFirestore, collection, getDocs, addDoc
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -28,7 +28,26 @@ getDocs(books)
     snapshot.docs.forEach((book) => {
       books.push({ id: book.id, ...book.data() });
     });
+
+    console.log(books);
   })
   .catch((error) => {
     console.log(error.message);
   });
+
+const addBook = document.querySelector('#add-book');
+addBook.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  addDoc(books, {
+    title: addBook.title.value,
+    author: addBook.author.value
+  })
+    .then(() => {
+      console.log('Successfully store a new data.');
+      addBook.reset();
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
+});
