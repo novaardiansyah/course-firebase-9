@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getFirestore, collection, getDocs, addDoc, deleteDoc, doc
+  getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -20,20 +20,16 @@ const db = getFirestore();
 // initialize collection
 const books = collection(db, 'books');
 
-// get docs
-getDocs(books)
-  .then((snapshot) => {
-    let books = [];
+//  Get Real Time Data
+onSnapshot(books, (snapshot) => {
+  let books = [];
 
-    snapshot.docs.forEach((book) => {
-      books.push({ id: book.id, ...book.data() });
-    });
-
-    console.log(books);
-  })
-  .catch((error) => {
-    console.log(error.message);
+  snapshot.docs.forEach((book) => {
+    books.push({ id: book.id, ...book.data() });
   });
+
+  console.log(books);
+});
 
 const addBook = document.querySelector('#add-book');
 addBook.addEventListener('submit', (e) => {
