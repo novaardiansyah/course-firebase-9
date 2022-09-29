@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import {
-  getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, where
+  getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp, updateDoc
 } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -20,7 +20,7 @@ const db = getFirestore();
 // initialize collection
 const books = collection(db, 'books');
 
-const q = query(books, where('author', '==', 'J.K. Rowling'));
+const q = query(books, orderBy('createdAt', 'asc'));
 
 //  Get Real Time Data
 onSnapshot(q, (snapshot) => {
@@ -39,7 +39,8 @@ addBook.addEventListener('submit', (e) => {
 
   addDoc(books, {
     title: addBook.title.value,
-    author: addBook.author.value
+    author: addBook.author.value,
+    createdAt: serverTimestamp()
   })
     .then(() => {
       console.log('Successfully store a new data.');
@@ -61,6 +62,32 @@ deleteBook.addEventListener('submit', (e) => {
       console.log('Successfully deleted data.');
       deleteBook.reset();
     })
+    .catch((error) => {
+      console.log(error.message);
+    });
+});
+
+// * Get a Single Document
+const book = doc(db, 'books', 'CgrDuXO22BXRoXxyrFwL');
+
+onSnapshot(book, (doc) => {
+  console.log(doc.data(), doc.id);
+});
+
+const updateBook = document.querySelector('#update-book');
+updateBook.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const book = doc(db, 'books', updateBook.idUpdate.value);
+
+  updateDoc(book, {
+    title: updateBook.titleUpdate.value,
+    author: updateBook.authorUpdate.value
+  })
+    .then(() => {
+      console.log('Successfully updated data.');
+      updateBook.reset();
+    } )
     .catch((error) => {
       console.log(error.message);
     });
