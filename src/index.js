@@ -1,7 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import {
-  getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp, updateDoc
-} from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, doc, query, where, orderBy, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword, signOut, signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyA9iGP9akS_osu9Wg2UpNnAv_t8xrpt4kg",
@@ -15,7 +14,8 @@ const firebaseConfig = {
 initializeApp(firebaseConfig);
 
 // initialize database
-const db = getFirestore();
+const db   = getFirestore();
+const auth = getAuth();
 
 // initialize collection
 const books = collection(db, 'books');
@@ -23,7 +23,7 @@ const books = collection(db, 'books');
 const q = query(books, orderBy('createdAt', 'asc'));
 
 //  Get Real Time Data
-onSnapshot(q, (snapshot) => {
+const unsubColl = onSnapshot(q, (snapshot) => {
   let books = [];
 
   snapshot.docs.forEach((book) => {
@@ -70,7 +70,7 @@ deleteBook.addEventListener('submit', (e) => {
 // * Get a Single Document
 const book = doc(db, 'books', 'CgrDuXO22BXRoXxyrFwL');
 
-onSnapshot(book, (doc) => {
+const unsubDoc = onSnapshot(book, (doc) => {
   console.log(doc.data(), doc.id);
 });
 
@@ -91,4 +91,67 @@ updateBook.addEventListener('submit', (e) => {
     .catch((error) => {
       console.log(error.message);
     });
+});
+
+const formSignup = document.querySelector('#signup-form');
+formSignup.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  let email    = formSignup.email.value;
+  let password = formSignup.password.value;
+
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      console.log(userCredential);
+      formSignup.reset();
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
+});
+
+const logout = document.querySelector('#logout');
+logout.addEventListener('click', (e) => {
+  e.preventDefault();
+  signOut(auth)
+    .then(() => {
+      console.log('Successfully sign out.');
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
+});
+
+const loginForm = document.querySelector('#login-form');
+loginForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  let email    = loginForm.emailLogin.value;
+  let password = loginForm.passwordLogin.value;
+
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      console.log(userCredential);
+      loginForm.reset();
+    })
+    .catch((error) => {
+      console.log(error.message);
+    });
+});
+
+const unsubAuth = onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log('User is logged in.');
+  } else {
+    console.log('User is logged out.');
+  }
+});
+
+const unsubscribe = document.querySelector('#unsubscribe');
+unsubscribe.addEventListener('click', (e) => {
+  e.preventDefault();
+  unsubColl();
+  unsubAuth();
+  unsubDoc();
+  console.log('Unsubscribed.');
 });
